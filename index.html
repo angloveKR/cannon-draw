@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1X6Q8KXZW3"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-1X6Q8KXZW3');</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대포뽑기</title>
+<meta name="description" content="이름이나 번호를 대포에 넣고 쏘는 랜덤 뽑기. 한 번 뽑힌 사람은 다시 안 나오는 중복 제거 기능!">
+<meta name="theme-color" content="#d7263d">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://anglovekr.github.io/cannon-draw/">
+<meta property="og:title" content="💥 대포뽑기 — 중복 없이 쏴라!">
+<meta property="og:description" content="이름·번호를 넣고 대포로 뽑기. 한 번 나온 사람은 다시 안 나와요. 결석 빼기, 크게 보기까지.">
+<meta property="og:image" content="https://anglovekr.github.io/cannon-draw/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 서커스 대포 쇼 — 신나고 시끄럽지만 쓰기 쉬움
+   IDEA: 서커스 천막 앞 대포 공연, 쏘아 올린 포탄이 깃발로 꽂힘
+   PICTURE: 천막·깃발줄·잔디 위의 대포 무대 (SVG), 첫 화면 대부분
+   COLOUR and TYPE: 서커스 빨강 + 흰색, 노랑 포인트 / Black Han Sans + IBM Plex Sans KR
+   LAYOUT: 빨간 띠 제목 → 무대 → 발사 컨트롤 → 결과 → 명단 설정 → 기록 */
+:root{color-scheme:light dark;
+--bg:light-dark(#fffdfa,#1a0f1f);--ink:light-dark(#22161a,#f7ecef);--mute:light-dark(#76646a,#b9a5ad);
+--card:light-dark(#ffffff,#28182f);--line:light-dark(#eadde0,#3e2a45);
+--red:#d7263d;--red2:light-dark(#b01d31,#ff5a6e);--yel:#ffc93c;
+--sky1:light-dark(#9fd8f2,#2a1640);--sky2:light-dark(#e4f5fc,#4a2350);
+--grass:light-dark(#5bb85a,#2f6b3b);--grass2:light-dark(#3f9a44,#22512c)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans KR",system-ui,sans-serif;overflow-x:clip}
+h1,h2,.big{font-family:"Black Han Sans","IBM Plex Sans KR",sans-serif;font-weight:400}
+header{background:var(--red);color:#fff;padding:18px max(5vw,16px) 16px;
+ background-image:repeating-linear-gradient(90deg,transparent 0 40px,rgba(255,255,255,.08) 40px 80px)}
+header .in,main{max-width:980px;margin:0 auto}
+h1{margin:0;font-size:clamp(32px,6vw,48px);line-height:1.05}
+header p{margin:4px 0 0;opacity:.92}
+main{padding:0 max(4vw,12px) 40px}
+.stage{margin:16px 0 0;border-radius:20px;overflow:hidden;border:3px solid var(--red);background:var(--sky2);position:relative}
+.stage svg{display:block;width:100%;height:auto}
+.msg{position:absolute;left:50%;top:12px;transform:translateX(-50%);max-width:calc(100% - 130px);text-align:center;background:rgba(0,0,0,.78);color:#fff;padding:6px 14px;border-radius:16px;font-size:14px;line-height:1.35;z-index:4;opacity:0;transition:opacity .25s;pointer-events:none}
+.msg.on{opacity:1}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0}
+.fire{flex:1 1 220px;min-height:64px;border:0;border-radius:16px;background:var(--red);color:#fff;font:400 28px "Black Han Sans",sans-serif;cursor:pointer;box-shadow:0 5px 0 #8c1424;transition:transform .08s}
+.fire:active{transform:translateY(4px);box-shadow:0 1px 0 #8c1424}
+.fire:disabled{background:#a99;box-shadow:0 5px 0 #766;cursor:default}
+.fire small{display:block;font:600 13px "IBM Plex Sans KR",sans-serif;opacity:.85}
+.step{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px}
+.step b{min-width:4.2em;text-align:center;font-size:17px}
+button,.btn{font:600 15px "IBM Plex Sans KR",sans-serif;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
+.step button{min-width:44px;padding:0;font-size:22px;border:0;background:transparent}
+.tog{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 12px;min-height:56px;cursor:pointer;user-select:none}
+.tog input{position:absolute;opacity:0;pointer-events:none}
+.sw{width:46px;height:26px;border-radius:99px;background:#bbb;position:relative;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s}
+.tog input:checked+.sw{background:var(--red)}
+.tog input:checked+.sw::after{transform:translateX(20px)}
+.tog input:focus-visible+.sw{outline:3px solid var(--yel);outline-offset:2px}
+.tog span:last-child{line-height:1.2}.tog small{display:block;color:var(--mute);font-size:13px}
+.result{background:var(--card);border:2px dashed var(--red);border-radius:18px;padding:14px 16px;min-height:88px}
+.result h2{margin:0 0 8px;font-size:20px;color:var(--red2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.hit{font:400 clamp(24px,5vw,34px)/1.1 "Black Han Sans",sans-serif;background:var(--yel);color:#3a2400;padding:8px 16px;border-radius:12px;animation:pop .35s ease-out both}
+@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+.empty{color:var(--mute)}
+.grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;margin-top:16px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.box h2{margin:0 0 10px;font-size:22px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button[aria-pressed=true]{background:var(--red);color:#fff;border-color:var(--red)}
+label.f{display:block;font-weight:600;font-size:14px;margin:8px 0 4px}
+input[type=number],input[type=text],textarea{width:100%;font:16px "IBM Plex Sans KR",sans-serif;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:140px;resize:vertical}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.note{font-size:13px;color:var(--mute);margin:6px 0 0}
+.note.ok{color:var(--red2);font-weight:600}
+.pool{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;max-height:220px;overflow:auto}
+.pool span{font-size:14px;padding:3px 10px;border-radius:99px;background:light-dark(#fde7ea,#47202b);white-space:nowrap}
+.pool span.out{background:transparent;color:var(--mute);text-decoration:line-through;border:1px dashed var(--line)}
+.cnt{font-weight:700;font-size:15px}.cnt b{color:var(--red2);font-size:20px}
+ol.hist{margin:0;padding:0;list-style:none;max-height:340px;overflow:auto}
+ol.hist li{display:flex;gap:10px;align-items:baseline;padding:7px 2px;border-bottom:1px solid var(--line)}
+ol.hist li i{font-style:normal;color:var(--mute);font-size:13px;min-width:2.6em;text-align:right}
+ol.hist li b{font-size:17px;overflow-wrap:anywhere}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.done{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--yel);color:#3a2400;font-weight:700;display:none}
+.done.on{display:block}
+.links{display:grid;gap:10px;margin-top:28px}
+.links a{display:block;padding:14px 16px;border-radius:14px;color:#fff;text-decoration:none;font-weight:700}
+.links a small{display:block;font-weight:400;opacity:.9}
+.help{margin-top:16px;color:var(--mute);font-size:14px}
+.help summary{cursor:pointer;font-weight:700;color:var(--ink);min-height:44px;display:flex;align-items:center}
+.pool button{font:14px "IBM Plex Sans KR",sans-serif;min-height:34px;padding:2px 12px;border-radius:99px;border:1px solid transparent;background:light-dark(#fde7ea,#47202b);color:var(--ink);white-space:nowrap}
+.pool button.out{background:transparent;color:var(--mute);text-decoration:line-through;border:1px dashed var(--line)}
+.pool button.off{background:light-dark(#eee,#333);color:var(--mute)}
+.pool button.off::after{content:" 결석";font-size:11px}
+.pool button sup{color:var(--red2);font-weight:700}
+.fsb{position:absolute;right:8px;top:8px;min-height:44px;min-width:44px;padding:0 10px;font-size:18px;background:rgba(255,255,255,.85);color:#222;border:0;z-index:3}
+.reveal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:rgba(20,8,14,.94);color:#fff;z-index:50;cursor:pointer;padding:16px;text-align:center}
+.reveal.on{display:flex}
+.reveal{overflow:auto;justify-content:safe center}
+
+.reveal p{margin:0;font-size:15px;opacity:.85}
+.reveal .names{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px}
+.reveal .names b{font:400 clamp(40px,11vw,120px)/1.05 "Black Han Sans",sans-serif;color:var(--yel);text-shadow:0 4px 0 #8c1424;animation:pop .4s ease-out both;overflow-wrap:anywhere}
+.reveal .names.many b{font-size:clamp(26px,6vw,64px)}
+:fullscreen{background:var(--bg);overflow:auto}
+:fullscreen main{max-width:min(98vw,calc(80vh * 1.76))}
+@media(max-width:700px){.grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.fire{flex-basis:100%}.tog,.step{flex:1 1 auto}}
+@media(prefers-reduced-motion:reduce){.hit{animation:none}}
+</style>
+</head>
+<body>
+<header><div class="in">
+<h1>💥 대포뽑기</h1>
+<p>이름이나 번호를 장전하고 쏘세요. <b>한 번 뽑힌 사람은 다시 안 나와요.</b></p>
+</div></header>
+<main>
+<div class="stage" id="stage">
+<svg id="svg" viewBox="0 0 600 340" aria-label="대포 무대">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sky1)"/><stop offset="1" stop-color="var(--sky2)"/></linearGradient>
+<linearGradient id="barrel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a5f66"/><stop offset=".45" stop-color="#2b2f35"/><stop offset="1" stop-color="#121417"/></linearGradient>
+<radialGradient id="ballg" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#777"/><stop offset="1" stop-color="#111"/></radialGradient>
+<pattern id="stripe" width="36" height="10" patternUnits="userSpaceOnUse"><rect width="18" height="10" fill="#d7263d"/><rect x="18" width="18" height="10" fill="#fff4f0"/></pattern>
+</defs>
+<rect width="600" height="340" fill="url(#sky)"/>
+<!-- 천막 -->
+<g opacity=".95">
+<polygon points="330,150 450,40 570,150" fill="url(#stripe)"/>
+<rect x="340" y="150" width="220" height="140" fill="url(#stripe)"/>
+<polygon points="340,150 560,150 560,165 340,165" fill="#000" opacity=".12"/>
+<path d="M425 290 Q450 200 475 290Z" fill="#3a1a20"/>
+<line x1="450" y1="40" x2="450" y2="14" stroke="#555" stroke-width="3"/>
+<polygon points="450,14 476,21 450,28" fill="#ffc93c"/>
+</g>
+<!-- 깃발줄 -->
+<path d="M0 30 Q150 70 300 34 T600 40" fill="none" stroke="#7a5a50" stroke-width="1.5"/>
+<g id="bunting"></g>
+<!-- 땅 -->
+<path d="M0 285 Q300 268 600 285 V340 H0Z" fill="var(--grass)"/>
+<path d="M0 310 Q300 296 600 312 V340 H0Z" fill="var(--grass2)"/>
+<!-- 과녁 -->
+<g transform="translate(450 302)"><ellipse rx="110" ry="16" fill="#fff" opacity=".35"/><ellipse rx="70" ry="10" fill="#d7263d" opacity=".35"/><ellipse rx="30" ry="5" fill="#fff" opacity=".5"/></g>
+<g id="flags"></g>
+<!-- 대포 -->
+<g id="cannon" transform="translate(92 262)">
+<g id="barrelG" transform="rotate(-35)">
+<g id="recoil">
+<rect x="-26" y="-17" width="112" height="34" rx="12" fill="url(#barrel)"/>
+<rect x="78" y="-21" width="16" height="42" rx="5" fill="#2b2f35"/>
+<rect x="10" y="-18" width="7" height="36" fill="#ffc93c"/><rect x="50" y="-18" width="7" height="36" fill="#ffc93c"/>
+<circle cx="-28" cy="0" r="10" fill="#2b2f35"/>
+</g></g>
+<path d="M-52 22 L30 22 L10 -6 L-30 -6Z" fill="#8a3a22"/>
+<g id="wheel"><circle r="28" cy="20" fill="#d7263d" stroke="#5c1420" stroke-width="5"/>
+<g stroke="#5c1420" stroke-width="4"><line y1="-8" y2="48" transform="translate(0 0)"/><line x1="-28" x2="28" y1="20" y2="20"/><line x1="-20" y1="0" x2="20" y2="40"/><line x1="20" y1="0" x2="-20" y2="40"/></g>
+<circle cy="20" r="6" fill="#ffc93c"/></g>
+</g>
+<g id="fx"></g>
+</svg>
+<div class="msg" id="msg"></div>
+<button class="fsb" id="fs" aria-label="전체화면" title="전체화면">⛶</button>
+<div class="reveal" id="reveal" role="dialog" aria-label="뽑힌 결과"><p id="revTop">당첨!</p><div class="names" id="revNames"></div><p>화면을 누르면 닫혀요</p></div>
+</div>
+
+<div class="ctrl">
+<button class="fire" id="fire">발사! <small>스페이스바로도 쏠 수 있어요</small></button>
+<div class="step" aria-label="한 번에 뽑을 개수"><button id="minus" aria-label="한 개 줄이기">−</button><b id="cntTxt">1발</b><button id="plus" aria-label="한 개 늘리기">+</button></div>
+<label class="tog"><input type="checkbox" id="dedupe" checked><span class="sw"></span><span>중복 제거<small id="dedTxt">뽑힌 사람은 다시 안 나옴</small></span></label>
+<label class="tog"><input type="checkbox" id="big" checked><span class="sw"></span><span>크게 보기<small>TV·전자칠판용</small></span></label>
+<label class="tog"><input type="checkbox" id="sound" checked><span class="sw"></span><span>효과음</span></label>
+</div>
+
+<section class="result" aria-live="polite">
+<h2>이번에 뽑힌</h2>
+<div class="chips" id="now"><span class="empty">아직 안 쐈어요. 발사 버튼을 눌러 보세요!</span></div>
+<div class="done" id="done">🎉 모두 뽑았어요! 다시 하려면 아래 ‘처음부터’를 누르세요.</div>
+</section>
+
+<div class="grid">
+<section class="box">
+<h2>🧨 장전할 명단</h2>
+<div class="tabs"><button id="tNum" aria-pressed="true">번호</button><button id="tName" aria-pressed="false">이름</button></div>
+<div id="pNum">
+<div class="row"><div><label class="f" for="from">시작 번호</label><input type="number" id="from" value="1" inputmode="numeric"></div>
+<div><label class="f" for="to">끝 번호</label><input type="number" id="to" value="30" inputmode="numeric"></div></div>
+<label class="f" for="ex">뺄 번호 (결번)</label><input type="text" id="ex" placeholder="예: 7, 13, 20-22">
+</div>
+<div id="pName" hidden>
+<label class="f" for="names">이름 (줄바꿈이나 쉼표로 구분)</label>
+<textarea id="names" placeholder="김민준&#10;이서연&#10;박지호*2"></textarea>
+<p class="note">이름 뒤에 <b>*2</b>를 붙이면 그 사람이 뽑힐 확률이 2배가 돼요. 진짜 동명이인이면 ‘김민준A’, ‘김민준B’처럼 구분해 주세요.</p>
+</div>
+<p class="note" id="dupNote"></p>
+<p class="cnt" id="cnt"></p>
+<p class="note">명단을 누르면 <b>결석</b>으로 빠지고, 다시 누르면 돌아와요. 줄 그어진(뽑힌) 이름을 누르면 기록에서 지워져요.</p>
+<div class="pool" id="pool"></div>
+</section>
+<section class="box">
+<h2>📜 뽑은 기록</h2>
+<ol class="hist" id="hist"></ol>
+<p class="empty" id="histEmpty">기록이 없어요.</p>
+<div class="acts">
+<button id="undo">↩ 하나 되돌리기</button>
+<button id="reset">처음부터</button>
+<button id="copy">결과 복사</button>
+</div>
+</section>
+</div>
+
+<details class="help"><summary>사용법</summary>
+<p>① 번호 범위나 이름을 넣어요. 같은 이름을 두 번 적어도 자동으로 하나만 남아요.<br>② 한 번에 몇 발 쏠지 고르고 <b>발사!</b> (스페이스바도 돼요)<br>③ <b>중복 제거</b>가 켜져 있으면 뽑힌 사람은 명단에서 빠져요. 끄면 매번 전체에서 다시 뽑아요.<br>④ 결석한 사람은 명단에서 눌러서 빼요. 뽑힌 이름을 누르면 그 기록만 지워져요.<br>⑤ ‘크게 보기’를 켜 두면 뽑힌 이름이 화면 가득 크게 떠요. 교실 TV에선 ‘전체화면’도 같이 써 보세요.<br>⑥ 잘못 뽑았으면 ‘하나 되돌리기’, 새로 시작하려면 ‘처음부터’. 명단과 기록은 이 기기 브라우저에 저장돼요.</p>
+</details>
+
+<nav class="links">
+<a href="https://anglovekr.github.io/seat-chart/" style="background:linear-gradient(135deg,#ea6a1f,#f59e0b)">🪑 반 자리 배치표 뽑기<small>번호로 자리 배치, 짝 모드까지</small></a>
+<a href="https://anglovekr.github.io/menu-race/" style="background:linear-gradient(135deg,#2f6e3c,#4a9c59)">🏇 메뉴 경마 — 오늘 뭐 먹지?<small>메뉴끼리 달려서 1등이 오늘 메뉴</small></a>
+<a href="https://anglovekr.github.io/number-baseball/" style="background:linear-gradient(135deg,#1e3a8a,#2563eb)">⚾ 숫자야구 해결사<small>스트라이크·볼만 넣으면 정답 추천</small></a>
+<a href="https://anglovekr.github.io/team-maker/" style="background:linear-gradient(135deg,#3b3bb3,#6b6bf0)">👥 조 정하기<small>번호·이름 넣고 버튼 한 번이면 랜덤 조 완성</small></a>
+</nav>
+</main>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const NS='http://www.w3.org/2000/svg';
+const KEY='cannon-draw-v1';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let st={mode:'num',from:1,to:30,ex:'',names:'',count:1,dedupe:true,sound:true,big:true,hist:[],off:[]};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&typeof s==='object')st=Object.assign(st,s)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+
+if(!Array.isArray(st.off))st.off=[];if(!Array.isArray(st.hist))st.hist=[];
+let entries=[],W={},busy=false;
+
+function rand(n){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}
+
+function parseEx(t){const out=new Set();for(const p of t.split(/[,\s]+/)){const m=p.match(/^(-?\d+)\s*[-~]\s*(-?\d+)$/);
+ if(m){let a=+m[1],b=+m[2];if(a>b)[a,b]=[b,a];for(let i=a;i<=b&&i-a<5000;i++)out.add(String(i))}else if(/^-?\d+$/.test(p))out.add(String(+p))}return out}
+
+function build(){
+ let note='';W={};
+ if(st.mode==='num'){
+  let a=Math.floor(+st.from),b=Math.floor(+st.to);
+  if(!isFinite(a)||!isFinite(b)){entries=[]}else{
+   if(a>b)[a,b]=[b,a];if(b-a>4999)b=a+4999;
+   const ex=parseEx(st.ex);entries=[];for(let i=a;i<=b;i++)if(!ex.has(String(i)))entries.push(String(i));
+   if(ex.size)note=`결번 ${[...ex].filter(x=>+x>=a&&+x<=b).length}개 뺐어요.`;
+  }
+ }else{
+  const raw=[];
+  for(const s of st.names.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean)){
+   const m=s.match(/^(.+?)\s*[*×]\s*(\d+)$/);const name=m?m[1].trim():s;
+   if(m)W[name]=Math.max(W[name]||1,Math.min(10,Math.max(1,+m[2])));raw.push(name)}
+  entries=[...new Set(raw)];
+  const d=raw.length-entries.length;
+  if(d)note=`✔ 겹치는 이름 ${d}개를 자동으로 정리했어요.`;
+ }
+ const n=$('dupNote');n.textContent=note;n.className='note'+(note.startsWith('✔')?' ok':'');
+ render();
+}
+const pickedSet=()=>new Set(st.hist.filter(h=>entries.includes(h)));
+const pool=()=>{const o=new Set(st.off);const p=st.dedupe?pickedSet():new Set();return entries.filter(e=>!p.has(e)&&!o.has(e))};
+const wt=e=>W[e]||1;
+function pickFrom(bag){let tot=0;for(const e of bag)tot+=wt(e);let r=rand(tot);for(let i=0;i<bag.length;i++){r-=wt(bag[i]);if(r<0)return i}return bag.length-1}
+
+function render(){
+ const p=pickedSet(),o=new Set(st.off),left=pool().length,offN=entries.filter(e=>o.has(e)).length;
+ $('cnt').innerHTML=entries.length?`남은 <b>${left}</b> / 전체 ${entries.length}`+(offN?` · 결석 ${offN}`:''):'명단이 비어 있어요.';
+ $('pool').innerHTML=entries.slice(0,600).map((e,i)=>`<button data-i="${i}" class="${o.has(e)?'off':st.dedupe&&p.has(e)?'out':''}">${esc(e)}${wt(e)>1?`<sup>×${wt(e)}</sup>`:''}</button>`).join('')+(entries.length>600?`<span>… 외 ${entries.length-600}개</span>`:'');
+ $('big').checked=st.big;
+ $('hist').innerHTML=st.hist.map((h,i)=>`<li><i>${i+1}번째</i><b>${esc(h)}</b></li>`).reverse().join('');
+ $('histEmpty').hidden=st.hist.length>0;
+ $('cntTxt').textContent=st.count+'발';
+ $('dedupe').checked=st.dedupe;$('sound').checked=st.sound;
+ $('dedTxt').textContent=st.dedupe?'뽑힌 사람은 다시 안 나옴':'꺼짐 — 같은 사람이 또 나올 수 있음';
+ const empty=entries.length>0&&left===0;
+ $('done').classList.toggle('on',empty&&st.dedupe);
+ $('fire').disabled=busy||left===0;
+ $('tNum').setAttribute('aria-pressed',st.mode==='num');$('tName').setAttribute('aria-pressed',st.mode==='name');
+ $('pNum').hidden=st.mode!=='num';$('pName').hidden=st.mode!=='name';
+}
+
+/* 깃발줄 */
+{let h='';const cols=['#d7263d','#ffc93c','#2f6fd6','#fff'];for(let i=0;i<20;i++){const x=i*31+8;const y=30+40*Math.sin(Math.PI*x/600)*(x<300?1:.15)+ (x<300?0:4);
+ h+=`<polygon points="${x},${y} ${x+18},${y} ${x+9},${y+16}" fill="${cols[i%4]}"/>`}$('bunting').innerHTML=h}
+
+/* 소리 */
+let ac=null;
+function audio(){if(!st.sound)return null;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();return ac}catch(e){return null}}
+function boom(){const a=audio();if(!a)return;const t=a.currentTime;
+ const len=a.sampleRate*.5,buf=a.createBuffer(1,len,a.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.5);
+ const src=a.createBufferSource();src.buffer=buf;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=900;const g=a.createGain();g.gain.value=.9;src.connect(f).connect(g).connect(a.destination);src.start(t);
+ const o=a.createOscillator(),og=a.createGain();o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(40,t+.3);og.gain.setValueAtTime(.8,t);og.gain.exponentialRampToValueAtTime(.001,t+.35);o.connect(og).connect(a.destination);o.start(t);o.stop(t+.4)}
+function pop(){const a=audio();if(!a)return;const t=a.currentTime;const o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.setValueAtTime(520,t);o.frequency.exponentialRampToValueAtTime(1100,t+.12);g.gain.setValueAtTime(.35,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g).connect(a.destination);o.start(t);o.stop(t+.22)}
+function fanfare(){const a=audio();if(!a)return;const t=a.currentTime;[523,659,784,1047].forEach((f,i)=>{const o=a.createOscillator(),g=a.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.0001,t+i*.1);g.gain.exponentialRampToValueAtTime(.12,t+i*.1+.02);g.gain.exponentialRampToValueAtTime(.001,t+i*.1+.25);o.connect(g).connect(a.destination);o.start(t+i*.1);o.stop(t+i*.1+.3)})}
+
+function msg(t){const m=$('msg');m.textContent=t;m.classList.add('on');clearTimeout(msg.t);msg.t=setTimeout(()=>m.classList.remove('on'),2200)}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent&&parent.appendChild(e);return e}
+
+/* 대포 */
+const PIV={x:92,y:262},LEN=94;
+function aim(deg){$('barrelG').setAttribute('transform',`rotate(${deg})`)}
+function muzzle(deg){const r=deg*Math.PI/180;return{x:PIV.x+Math.cos(r)*LEN,y:PIV.y+Math.sin(r)*LEN}}
+
+function smoke(x,y){const fx=$('fx');for(let i=0;i<9;i++){const c=el('circle',{cx:x,cy:y,r:6,fill:i<3?'#ffc93c':'#ddd',opacity:.9},fx);
+ const dx=(Math.random()*40+5),dy=(Math.random()-.6)*40,s=performance.now();
+ (function f(n){const k=Math.min(1,(n-s)/600);c.setAttribute('cx',x+dx*k);c.setAttribute('cy',y+dy*k);c.setAttribute('r',6+18*k);c.setAttribute('opacity',.9*(1-k));k<1?requestAnimationFrame(f):c.remove()})(s)}}
+
+function confetti(x,y){const fx=$('fx'),cols=['#d7263d','#ffc93c','#2f6fd6','#fff','#5bb85a'];for(let i=0;i<14;i++){const r=el('rect',{x,y,width:5,height:8,fill:cols[i%5]},fx);
+ const vx=(Math.random()-.5)*160,vy=-Math.random()*160-40,s=performance.now();
+ (function f(n){const t=(n-s)/1000;if(t>.9){r.remove();return}r.setAttribute('x',x+vx*t);r.setAttribute('y',y+vy*t+260*t*t);r.setAttribute('transform',`rotate(${t*720} ${x+vx*t} ${y+vy*t+260*t*t})`);requestAnimationFrame(f)})(s)}}
+
+function flag(x,y,name,size,tall){const g=el('g',{},$('flags'));
+ const len=[...name].length;
+ const fs=Math.max(12,Math.min(22,size/Math.max(2,len)*1.7));
+ const w=Math.min(Math.max(size,60),Math.max(34,len*fs*.95+14)),h=fs+12,P=tall?100:58;
+ const fx=x+w>596?x-w:x;
+ el('line',{x1:x,y1:y,x2:x,y2:y-P,stroke:'#5a4030','stroke-width':2.5},g);
+ el('rect',{x:fx,y:y-P,width:w,height:h,rx:4,fill:'#ffc93c',stroke:'#3a2400','stroke-width':1.5},g);
+ const t=el('text',{x:fx+w/2,y:y-P+h/2+fs*.36,'text-anchor':'middle','font-size':fs,'font-family':'Black Han Sans, sans-serif',fill:'#3a2400'},g);t.textContent=name;
+ if(t.getComputedTextLength&&t.getComputedTextLength()>w-8)t.setAttribute('textLength',w-8),t.setAttribute('lengthAdjust','spacingAndGlyphs');
+ el('ellipse',{cx:x,cy:y+1,rx:10,ry:3,fill:'#000',opacity:.25},g);
+ if(!reduce){g.style.transformOrigin=`${x}px ${y}px`;g.animate([{transform:'scale(0)'},{transform:'scale(1.15)'},{transform:'scale(1)'}],{duration:320,easing:'ease-out'})}}
+
+function shoot(name,tx,size,tall){return new Promise(res=>{
+ const deg=-30-rand(14);aim(deg);const m=muzzle(deg);boom();smoke(m.x,m.y);
+ const rc=$('recoil');if(!reduce)rc.animate([{transform:'translateX(-14px)'},{transform:'translateX(0)'}],{duration:260,easing:'ease-out'});
+ const ty=298+rand(10);
+ if(reduce){flag(tx,ty,name,size,tall);pop();res();return}
+ const ball=el('circle',{cx:m.x,cy:m.y,r:9,fill:'url(#ballg)'},$('fx'));
+ const D=850,H=150+rand(50),s=performance.now();
+ (function f(n){const k=Math.min(1,(n-s)/D);const x=m.x+(tx-m.x)*k,y=m.y+(ty-m.y)*k-H*4*k*(1-k);
+  ball.setAttribute('cx',x);ball.setAttribute('cy',y);
+  if(k<1)requestAnimationFrame(f);else{ball.remove();pop();confetti(tx,ty-10);flag(tx,ty,name,size,tall);res()}})(s);
+})}
+
+async function fire(){
+ if(busy)return;const p=pool();if(!p.length){msg('남은 사람이 없어요!');return}
+ let n=st.count;if(st.dedupe&&n>p.length){msg(`${p.length}명만 남아서 ${p.length}발만 쏠게요`);n=p.length}
+ const picks=[];const bag=p.slice();
+ for(let i=0;i<n;i++){const j=pickFrom(bag);picks.push(bag[j]);if(st.dedupe)bag.splice(j,1)}
+ busy=true;render();$('flags').innerHTML='';closeReveal();
+ $('now').innerHTML='';
+ await aimSweep();
+ const L=250,R=575,slot=(R-L)/n;
+ for(let i=0;i<picks.length;i++){
+  const tx=L+slot*i+slot*.15+rand(Math.max(1,Math.floor(slot*.3)));
+  const two=n>3;const pr=shoot(picks[i],tx,two?Math.max(40,slot*2-6):Math.max(40,slot+10),two&&i%2===1);
+  await sleep(reduce?120:Math.max(280,700-n*45));
+  if(i===picks.length-1)await pr;
+  pr.then(()=>{st.hist.push(picks[i]);save();const c=document.createElement('span');c.className='hit';c.textContent=picks[i];$('now').appendChild(c);render()});
+ }
+ await sleep(60);busy=false;render();
+ const all=st.dedupe&&!pool().length;
+ if(all){fanfare();msg('🎉 모두 뽑았어요!')}
+ if(st.big){await sleep(reduce?0:350);showReveal(picks,all)}
+}
+
+/* 조준: 대포가 이리저리 흔들리다 발사 */
+function drum(ms){const a=audio();if(!a)return;const t=a.currentTime;for(let k=0;k<ms/55;k++){const o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=95+rand(20);const s=t+k*.055;g.gain.setValueAtTime(.0001,s);g.gain.exponentialRampToValueAtTime(.25+k*.01,s+.01);g.gain.exponentialRampToValueAtTime(.001,s+.05);o.connect(g).connect(a.destination);o.start(s);o.stop(s+.06)}}
+function aimSweep(){if(reduce)return Promise.resolve();const ms=900;drum(ms);return new Promise(res=>{const s=performance.now();
+ (function f(n){const k=(n-s)/ms;if(k>=1){res();return}aim(-32-14*Math.sin(k*Math.PI*5)*(1-k*.6));requestAnimationFrame(f)})(s)})}
+
+function showReveal(picks,all){const r=$('revNames');r.className='names'+(picks.length>3?' many':'');
+ r.innerHTML=picks.map(p=>`<b>${esc(p)}</b>`).join('');$('revTop').textContent=all?'🎉 마지막 당첨! 모두 뽑았어요':picks.length>1?`${picks.length}명 당첨!`:'당첨!';$('reveal').classList.add('on')}
+function closeReveal(){$('reveal').classList.remove('on')}
+
+/* 이벤트 */
+$('fire').addEventListener('click',fire);
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&!/INPUT|TEXTAREA|BUTTON|SELECT/.test(e.target.tagName)){e.preventDefault();fire()}});
+$('minus').onclick=()=>{st.count=Math.max(1,st.count-1);save();render()};
+$('plus').onclick=()=>{st.count=Math.min(10,st.count+1);save();render()};
+$('dedupe').onchange=e=>{st.dedupe=e.target.checked;save();render();msg(st.dedupe?'중복 제거 켬: 뽑힌 사람은 빠져요':'중복 제거 끔: 매번 전체에서 뽑아요')};
+$('sound').onchange=e=>{st.sound=e.target.checked;save()};
+$('big').onchange=e=>{st.big=e.target.checked;save()};
+$('reveal').onclick=closeReveal;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReveal()});
+$('fs').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch(e){msg('이 화면에선 전체화면이 안 돼요 (사이트에선 돼요)')}};
+document.addEventListener('fullscreenchange',()=>{$('fs').textContent=document.fullscreenElement?'✕':'⛶'});
+$('pool').onclick=e=>{const b=e.target.closest('button[data-i]');if(!b||busy)return;const name=entries[+b.dataset.i];if(name==null)return;
+ if(st.dedupe&&st.hist.includes(name)&&!st.off.includes(name)){const k=st.hist.lastIndexOf(name);st.hist.splice(k,1);msg(`‘${name}’ 기록에서 지웠어요`)}
+ else if(st.off.includes(name)){st.off=st.off.filter(x=>x!==name);msg(`‘${name}’ 돌아왔어요`)}
+ else{st.off.push(name);msg(`‘${name}’ 결석 처리`)}
+ save();render()};
+$('tNum').onclick=()=>{st.mode='num';save();build()};
+$('tName').onclick=()=>{st.mode='name';save();build()};
+for(const id of ['from','to','ex','names'])$(id).addEventListener('input',e=>{st[id]=e.target.value;save();build()});
+$('undo').onclick=()=>{if(busy||!st.hist.length)return;const x=st.hist.pop();save();render();msg(`‘${x}’ 되돌렸어요`);$('flags').innerHTML='';$('now').innerHTML='<span class="empty">하나 되돌렸어요.</span>'};
+let resetArm=0;
+$('reset').onclick=()=>{if(busy)return;if(!st.hist.length)return;
+ if(Date.now()-resetArm>3000){resetArm=Date.now();$('reset').textContent='한 번 더 누르면 초기화';setTimeout(()=>$('reset').textContent='처음부터',3000);return}
+ st.hist=[];save();$('flags').innerHTML='';$('now').innerHTML='<span class="empty">다시 장전 완료! 발사하세요.</span>';$('reset').textContent='처음부터';render();msg('처음부터 다시!')};
+$('copy').onclick=async()=>{const t=st.hist.map((h,i)=>`${i+1}. ${h}`).join('\n');if(!t){msg('복사할 기록이 없어요');return}
+ try{await navigator.clipboard.writeText(t);msg('결과를 복사했어요')}catch(e){msg('복사가 안 되는 환경이에요')}};
+
+
+$('from').value=st.from;$('to').value=st.to;$('ex').value=st.ex;$('names').value=st.names;
+build();
+}
+</script>
+</body>
+</html>
