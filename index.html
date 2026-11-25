@@ -6,8 +6,10 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-1X6Q8KXZW3');</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>대포뽑기</title>
-<meta name="description" content="이름이나 번호를 대포에 넣고 쏘는 랜덤 뽑기. 한 번 뽑힌 사람은 다시 안 나오는 중복 제거 기능!">
+<title>대포뽑기 — 랜덤 번호·이름 뽑기, 중복 없는 발표자 추첨</title>
+<meta name="description" content="이름·번호를 대포에 넣고 쏘는 랜덤 뽑기. 한 번 뽑힌 사람은 다시 안 나오는 중복 없는 추첨이라 발표자 뽑기, 번호 뽑기, 순서 정하기에 딱! 결석 빼기, 여러 명 동시 뽑기, TV 크게 보기 지원. 무료, 설치 없음.">
+<link rel="canonical" href="https://anglovekr.github.io/cannon-draw/">
+<script type="application/ld+json">[{"@context": "https://schema.org", "@type": "WebApplication", "name": "대포뽑기", "url": "https://anglovekr.github.io/cannon-draw/", "description": "이름·번호를 대포에 넣고 쏘는 랜덤 뽑기. 한 번 뽑힌 사람은 다시 안 나오는 중복 없는 추첨이라 발표자 뽑기, 번호 뽑기, 순서 정하기에 딱! 결석 빼기, 여러 명 동시 뽑기, TV 크게 보기 지원. 무료, 설치 없음.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Web", "inLanguage": "ko", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}}, {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "한 번 뽑힌 사람이 다시 안 나오게 할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "네. ‘중복 제거’가 기본으로 켜져 있어서, 한 번 뽑힌 사람은 모두 뽑힐 때까지 다시 나오지 않아요. 끄면 매번 전체 명단에서 다시 뽑아요."}}, {"@type": "Question", "name": "번호 말고 이름으로도 뽑을 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "네. ‘이름’ 탭에 이름을 줄바꿈이나 쉼표로 넣으면 돼요. 같은 이름을 두 번 적으면 자동으로 하나만 남겨요."}}, {"@type": "Question", "name": "결석한 사람은 어떻게 빼나요?", "acceptedAnswer": {"@type": "Answer", "text": "번호 모드에선 ‘뺄 번호’ 칸에 7, 13, 20-22처럼 적고, 아래 명단에서 이름이나 번호를 한 번 누르면 결석으로 빠져요. 다시 누르면 돌아와요."}}, {"@type": "Question", "name": "여러 명을 한 번에 뽑을 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "네. 발사 버튼 옆에서 1발부터 10발까지 정할 수 있어요. 한 번에 쏜 사람끼리도 겹치지 않아요."}}, {"@type": "Question", "name": "결과는 공정한가요?", "acceptedAnswer": {"@type": "Answer", "text": "브라우저의 보안용 난수(crypto.getRandomValues)로 뽑아서 누구에게도 유리하지 않아요. 일부러 확률을 바꾸고 싶을 때만 이름 뒤에 *2처럼 적으면 그 사람의 확률이 2배가 돼요."}}, {"@type": "Question", "name": "명단이 다른 곳에 저장되거나 보내지나요?", "acceptedAnswer": {"@type": "Answer", "text": "아니요. 명단과 기록은 지금 쓰는 기기의 브라우저에만 저장되고, 서버로 보내지 않아요."}}, {"@type": "Question", "name": "교실 TV나 전자칠판에서 크게 보려면?", "acceptedAnswer": {"@type": "Answer", "text": "‘크게 보기’를 켜 두면 뽑힌 이름이 화면 가득 떠요. 무대 오른쪽 위 ⛶ 버튼으로 전체화면도 할 수 있어요."}}]}]</script>
 <meta name="theme-color" content="#d7263d">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://anglovekr.github.io/cannon-draw/">
@@ -98,6 +100,11 @@ ol.hist li b{font-size:17px;overflow-wrap:anywhere}
 .links a{display:block;padding:14px 16px;border-radius:14px;color:#fff;text-decoration:none;font-weight:700}
 .links a small{display:block;font-weight:400;opacity:.9}
 .help{margin-top:16px;color:var(--mute);font-size:14px}
+header .tags{margin:6px 0 0;font-size:13px;opacity:.85}
+.faq{margin-top:20px}.faq h2{font-size:22px;margin:0 0 8px}
+.faq details{border-top:1px solid var(--line);padding:2px 0}.faq details:last-child{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;font-weight:700;min-height:48px;display:flex;align-items:center;padding:6px 0}
+.faq details p{margin:0 0 12px;color:var(--mute)}
 .help summary{cursor:pointer;font-weight:700;color:var(--ink);min-height:44px;display:flex;align-items:center}
 .pool button{font:14px "IBM Plex Sans KR",sans-serif;min-height:34px;padding:2px 12px;border-radius:99px;border:1px solid transparent;background:light-dark(#fde7ea,#47202b);color:var(--ink);white-space:nowrap}
 .pool button.out{background:transparent;color:var(--mute);text-decoration:line-through;border:1px dashed var(--line)}
@@ -123,6 +130,7 @@ ol.hist li b{font-size:17px;overflow-wrap:anywhere}
 <header><div class="in">
 <h1>💥 대포뽑기</h1>
 <p>이름이나 번호를 장전하고 쏘세요. <b>한 번 뽑힌 사람은 다시 안 나와요.</b></p>
+<p class="tags">랜덤 번호 뽑기 · 이름 뽑기 · 발표자 뽑기 · 중복 없는 추첨</p>
 </div></header>
 <main>
 <div class="stage" id="stage">
@@ -221,6 +229,16 @@ ol.hist li b{font-size:17px;overflow-wrap:anywhere}
 <details class="help"><summary>사용법</summary>
 <p>① 번호 범위나 이름을 넣어요. 같은 이름을 두 번 적어도 자동으로 하나만 남아요.<br>② 한 번에 몇 발 쏠지 고르고 <b>발사!</b> (스페이스바도 돼요)<br>③ <b>중복 제거</b>가 켜져 있으면 뽑힌 사람은 명단에서 빠져요. 끄면 매번 전체에서 다시 뽑아요.<br>④ 결석한 사람은 명단에서 눌러서 빼요. 뽑힌 이름을 누르면 그 기록만 지워져요.<br>⑤ ‘크게 보기’를 켜 두면 뽑힌 이름이 화면 가득 크게 떠요. 교실 TV에선 ‘전체화면’도 같이 써 보세요.<br>⑥ 잘못 뽑았으면 ‘하나 되돌리기’, 새로 시작하려면 ‘처음부터’. 명단과 기록은 이 기기 브라우저에 저장돼요.</p>
 </details>
+
+<section class="faq"><h2>자주 묻는 질문</h2>
+<details><summary>한 번 뽑힌 사람이 다시 안 나오게 할 수 있나요?</summary><p>네. ‘중복 제거’가 기본으로 켜져 있어서, 한 번 뽑힌 사람은 모두 뽑힐 때까지 다시 나오지 않아요. 끄면 매번 전체 명단에서 다시 뽑아요.</p></details>
+<details><summary>번호 말고 이름으로도 뽑을 수 있나요?</summary><p>네. ‘이름’ 탭에 이름을 줄바꿈이나 쉼표로 넣으면 돼요. 같은 이름을 두 번 적으면 자동으로 하나만 남겨요.</p></details>
+<details><summary>결석한 사람은 어떻게 빼나요?</summary><p>번호 모드에선 ‘뺄 번호’ 칸에 7, 13, 20-22처럼 적고, 아래 명단에서 이름이나 번호를 한 번 누르면 결석으로 빠져요. 다시 누르면 돌아와요.</p></details>
+<details><summary>여러 명을 한 번에 뽑을 수 있나요?</summary><p>네. 발사 버튼 옆에서 1발부터 10발까지 정할 수 있어요. 한 번에 쏜 사람끼리도 겹치지 않아요.</p></details>
+<details><summary>결과는 공정한가요?</summary><p>브라우저의 보안용 난수(crypto.getRandomValues)로 뽑아서 누구에게도 유리하지 않아요. 일부러 확률을 바꾸고 싶을 때만 이름 뒤에 *2처럼 적으면 그 사람의 확률이 2배가 돼요.</p></details>
+<details><summary>명단이 다른 곳에 저장되거나 보내지나요?</summary><p>아니요. 명단과 기록은 지금 쓰는 기기의 브라우저에만 저장되고, 서버로 보내지 않아요.</p></details>
+<details><summary>교실 TV나 전자칠판에서 크게 보려면?</summary><p>‘크게 보기’를 켜 두면 뽑힌 이름이 화면 가득 떠요. 무대 오른쪽 위 ⛶ 버튼으로 전체화면도 할 수 있어요.</p></details>
+</section>
 
 <nav class="links">
 <a href="https://anglovekr.github.io/seat-chart/" style="background:linear-gradient(135deg,#ea6a1f,#f59e0b)">🪑 반 자리 배치표 뽑기<small>번호로 자리 배치, 짝 모드까지</small></a>
