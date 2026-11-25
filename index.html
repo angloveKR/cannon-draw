@@ -117,7 +117,6 @@ ol.hist li b{font-size:17px;overflow-wrap:anywhere}
 :fullscreen main{max-width:min(98vw,calc(80vh * 1.76))}
 @media(max-width:700px){.grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){.fire{flex-basis:100%}.tog,.step{flex:1 1 auto}}
-@media(prefers-reduced-motion:reduce){.hit{animation:none}}
 </style>
 </head>
 <body>
@@ -237,7 +236,7 @@ const $=id=>document.getElementById(id);
 const NS='http://www.w3.org/2000/svg';
 const KEY='cannon-draw-v1';
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduce=false; /* 대포 연출은 사이트의 핵심이라 '애니메이션 끄기' 설정과 상관없이 항상 보여 줌 */
 
 let st={mode:'num',from:1,to:30,ex:'',names:'',count:1,dedupe:true,sound:true,big:true,hist:[],off:[]};
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&typeof s==='object')st=Object.assign(st,s)}catch(e){}
